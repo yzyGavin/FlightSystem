@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select max(`flight_management_system`.`bookticket`.`booknum`) AS `max_ticket_num` from `flight_management_system`.`bookticket`
+md5=4450e297e4af4a260d686a93a9e07b5c
+updatable=0
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2017-01-02 18:47:17
+create-version=1
+source=SELECT max(booknum) max_ticket_num FROM bookticket
+client_cs_name=utf8
+connection_cl_name=utf8_general_ci
+view_body_utf8=select max(`flight_management_system`.`bookticket`.`booknum`) AS `max_ticket_num` from `flight_management_system`.`bookticket`

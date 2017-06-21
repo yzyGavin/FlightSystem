@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `l`.`airlineno` AS `airlineno`,`l`.`airwayshortname` AS `airwayshortname`,`p`.`airplaneno` AS `airplaneno`,`p`.`airplanetype` AS `airplanetype`,`d`.`countryname` AS `departurecountry`,`l`.`departurecity` AS `departurecity`,`a`.`countryname` AS `arrivecountry`,`l`.`arrivecity` AS `arrivecity`,`l`.`departuredate` AS `departuredate`,`l`.`departuretime` AS `departuretime`,`l`.`arrivetime` AS `arrivetime`,`l`.`economyclassprice` AS `economyclassprice`,`p`.`economyclassnum` AS `economyclassnum`,`l`.`businessclassprice` AS `businessclassprice`,`p`.`businessclassnum` AS `businessclassnum`,`l`.`deluxeclassprice` AS `deluxeclassprice`,`p`.`deluxeclassnum` AS `deluxeclassnum` from `flight_management_system`.`airline` `l` join `flight_management_system`.`airplane` `p` join `flight_management_system`.`city` `x` join `flight_management_system`.`city` `y` join `flight_management_system`.`country` `d` join `flight_management_system`.`country` `a` where ((`l`.`departurecity` = `x`.`cityname`) and (`l`.`arrivecity` = `y`.`cityname`) and (`x`.`countryno` = `d`.`countryno`) and (`a`.`countryno` = `y`.`countryno`) and (`l`.`airlineno` = `p`.`airlineno`))
+md5=9f4c97b0d201384184d10f8a77b66683
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2017-01-02 23:02:58
+create-version=1
+source=SELECT l.airlineno, airwayshortname, airplaneno, airplanetype, d.countryname departurecountry,\n        l.departurecity, a.countryname arrivecountry, l.arrivecity, departuredate, departuretime,\n          arrivetime, economyclassprice, economyclassnum, businessclassprice, businessclassnum,\n            deluxeclassprice, deluxeclassnum\nFROM airline l, airplane p, city x, city y, country d, country a\nWHERE l.departurecity = x.cityname AND l.arrivecity = y.cityname\n      and x.countryno = d.countryno and a.countryno = y.countryno\n      and l.airlineno = p.airlineno
+client_cs_name=utf8
+connection_cl_name=utf8_general_ci
+view_body_utf8=select `l`.`airlineno` AS `airlineno`,`l`.`airwayshortname` AS `airwayshortname`,`p`.`airplaneno` AS `airplaneno`,`p`.`airplanetype` AS `airplanetype`,`d`.`countryname` AS `departurecountry`,`l`.`departurecity` AS `departurecity`,`a`.`countryname` AS `arrivecountry`,`l`.`arrivecity` AS `arrivecity`,`l`.`departuredate` AS `departuredate`,`l`.`departuretime` AS `departuretime`,`l`.`arrivetime` AS `arrivetime`,`l`.`economyclassprice` AS `economyclassprice`,`p`.`economyclassnum` AS `economyclassnum`,`l`.`businessclassprice` AS `businessclassprice`,`p`.`businessclassnum` AS `businessclassnum`,`l`.`deluxeclassprice` AS `deluxeclassprice`,`p`.`deluxeclassnum` AS `deluxeclassnum` from `flight_management_system`.`airline` `l` join `flight_management_system`.`airplane` `p` join `flight_management_system`.`city` `x` join `flight_management_system`.`city` `y` join `flight_management_system`.`country` `d` join `flight_management_system`.`country` `a` where ((`l`.`departurecity` = `x`.`cityname`) and (`l`.`arrivecity` = `y`.`cityname`) and (`x`.`countryno` = `d`.`countryno`) and (`a`.`countryno` = `y`.`countryno`) and (`l`.`airlineno` = `p`.`airlineno`))

@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `flight_management_system`.`shipspace`.`shipname` AS `shipname` from `flight_management_system`.`shipspace`
+md5=9344b0d976268c51a86b921af514ee61
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2017-01-01 18:55:13
+create-version=1
+source=SELECT shipname FROM shipspace
+client_cs_name=utf8
+connection_cl_name=utf8_general_ci
+view_body_utf8=select `flight_management_system`.`shipspace`.`shipname` AS `shipname` from `flight_management_system`.`shipspace`
