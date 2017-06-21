@@ -1,11 +1,8 @@
-#include "flightmanager.h"
+#include "FlightManager.h"
 #include "ui_flightmanager.h"
 
 #include <cstdlib>
-
 #include <iostream>
-using std::cout;
-using std::endl;
 
 FlightManager::FlightManager(QWidget *parent) :
     QMainWindow(parent),
@@ -15,7 +12,7 @@ FlightManager::FlightManager(QWidget *parent) :
     setObjectName("FilghtManager");
     setWindowTitle("航天信息管理系统");
 
-    m_Connect = ConnectDataBase::GetInstance();
+    _connect = ConnectDataBase::GetInstance();
 
     Init();
 
@@ -29,13 +26,13 @@ FlightManager::FlightManager(QWidget *parent) :
 FlightManager::~FlightManager()
 {
     delete ui;
-    cout << "delete FlightManger" << endl;
+    std::cout << "delete FlightManger" << std::endl;
 }
 
 void FlightManager::Init()
 {
-    m_Sex.append("男");
-    m_Sex.append("女");
+    _vecSex.append("男");
+    _vecSex.append("女");
 
     ui->list->insertItem(0, "欢迎");
     ui->list->insertItem(1, "查询");
@@ -75,27 +72,27 @@ void FlightManager::Init()
     //添加页面中的创建客户信息标签页
     JudgeReturnValue(ui->newnoshow, GetMaxNum("SELECT * FROM vi_customernum") );
     ui->newtypeselect->setEditable(false);
-    if (!m_CustomerType.size())
+    if (!_vecCustomerType.size())
         GetCustomerType();
-    SetCustomer(ui->newtypeselect, m_CustomerType);
-    SetCustomer(ui->newsexshow, m_Sex);
+    SetCustomer(ui->newtypeselect, _vecCustomerType);
+    SetCustomer(ui->newsexshow, _vecSex);
     ui->inserttab->setTabText(0, "创建客户信息");
 
     //添加页面中的订票信息标签页
     JudgeReturnValue(ui->bktktno, GetMaxNum("SELECT * FROM vi_ticket_max") );
-    if (!m_CustomerInfo.size())
+    if (!_vecCustomerInfo.size())
         GetCustomerInfo();
-    SetCustomer(ui->bktktctmno, m_CustomerNo);
+    SetCustomer(ui->bktktctmno, _vecCustomerNo);
     SetCustomerInfoOnBook(ui->bktktctmno->currentIndex());
-    if (!m_Country_Name.size())
+    if (!_vecCountryName.size())
         GetCity();
-    SetCustomer(ui->bktktdepcot, m_Country_Name);
+    SetCustomer(ui->bktktdepcot, _vecCountryName);
     SetCityOnBook(ui->bktktdepcy, ui->bktktdepcot->currentText());
-    SetCustomer(ui->bktktarrcot, m_Country_Name);
+    SetCustomer(ui->bktktarrcot, _vecCountryName);
     SetCityOnBook(ui->bktktarrcy, ui->bktktarrcot->currentText());
-    if (!m_Ship.size())
+    if (!_vecShip.size())
         GetShip();
-    SetCustomer(ui->bktktship, m_Ship);
+    SetCustomer(ui->bktktship, _vecShip);
 
     ui->inserttab->setTabText(1, "订票");
     ui->inserttab->setCurrentIndex(0);
@@ -111,47 +108,47 @@ void FlightManager::Init()
     ui->chgctmtypchk->setChecked(false);
     ui->chgctmtypcom->setEditable(false);
     ui->chgctmtypcom->setEnabled(false);
-    if (!m_CustomerInfo.size())
+    if (!_vecCustomerInfo.size())
         GetCustomerInfo();
-    SetCustomer(ui->chgctmselcom, m_CustomerNo);
-    SetCustomer(ui->chgctmsexcom, m_Sex);
-    SetCustomer(ui->chgctmtypcom, m_CustomerType);
+    SetCustomer(ui->chgctmselcom, _vecCustomerNo);
+    SetCustomer(ui->chgctmsexcom, _vecSex);
+    SetCustomer(ui->chgctmtypcom, _vecCustomerType);
     CustomerValueChange(0);
 
     //更新页面中的客机信息更改
     GetAirPlaneChange();
-    for (int i = 0; i < m_PlaneInfo.size(); ++i)
-        ui->chgplaneselcom->addItem(QString::number(m_PlaneInfo[i].plane_no) );
+    for (int i = 0; i < _vecPlaneInfo.size(); ++i)
+        ui->chgplaneselcom->addItem(QString::number(_vecPlaneInfo[i].plane_no) );
     PlaneValueChange(0);
     //更新页面中客机航线信息的更改
 
     GetAirLineInfo();
-    for (int i = 0; i < m_LineInfo.size(); ++i)
+    for (int i = 0; i < _vecLineInfo.size(); ++i)
     {
-        ui->chgplanelinecom->addItem(QString::number(m_LineInfo[i].line_no) );
-        ui->chglinenocom->addItem(QString::number(m_LineInfo[i].line_no) );
+        ui->chgplanelinecom->addItem(QString::number(_vecLineInfo[i].line_no) );
+        ui->chglinenocom->addItem(QString::number(_vecLineInfo[i].line_no) );
     }
     LineChangeOnPlane(0);
 
     //更新页面中客户优惠类型
-    SetCustomer(ui->chgtypselcom, m_CustomerType );
+    SetCustomer(ui->chgtypselcom, _vecCustomerType );
     ui->chgtypselcom->setCurrentIndex(0);
-    ui->chgtypinline->setPlaceholderText(QString::number(m_TypeDiscount[ui->chgtypselcom->currentText()]) );
+    ui->chgtypinline->setPlaceholderText(QString::number(_mapTypeDiscount[ui->chgtypselcom->currentText()]) );
 
     //更新页面中的订票类型
     GetTicket();
-    for (int i = 0; i < m_TicketInfo.size(); ++i)
+    for (int i = 0; i < _vecTicketInfo.size(); ++i)
     {
-        ui->chgtktnocom->addItem(QString::number(m_TicketInfo[i].book_num) );
-        ui->delticketno->addItem(QString::number(m_TicketInfo[i].book_num) );
+        ui->chgtktnocom->addItem(QString::number(_vecTicketInfo[i].book_num) );
+        ui->delticketno->addItem(QString::number(_vecTicketInfo[i].book_num) );
     }
     TicketValueChangeOnUpdate(0);
-    if (!m_Ship.size())
+    if (!_vecShip.size())
         GetShip();
-    SetCustomer(ui->chgtktshipcom, m_Ship);
+    SetCustomer(ui->chgtktshipcom, _vecShip);
     GetAirLineInfo();
-    for (int i = 0; i < m_LineInfo.size(); ++i)
-        ui->chgtktlinecom->addItem(QString::number(m_LineInfo[i].line_no) );
+    for (int i = 0; i < _vecLineInfo.size(); ++i)
+        ui->chgtktlinecom->addItem(QString::number(_vecLineInfo[i].line_no) );
     LineChangeOnTicket(ui->chgtktlinecom->currentIndex() );
 
     //更新页面中航线类型的更改
@@ -177,13 +174,13 @@ void FlightManager::Init()
     ui->chglinebusedit->setEnabled(false);
     ui->chglinedeledit->setEnabled(false);
 
-    if (!m_Airway.size())
+    if (!_vecAirway.size())
         GetAirWay();
-    if (!m_City_Name.size())
+    if (!_vecCityName.size())
         GetCity();
-    SetCustomer(ui->chglinecmpcom, m_Airway);
-    SetCustomer(ui->chglinedepcom, m_City_Name);
-    SetCustomer(ui->chglinearrcom, m_City_Name);
+    SetCustomer(ui->chglinecmpcom, _vecAirway);
+    SetCustomer(ui->chglinedepcom, _vecCityName);
+    SetCustomer(ui->chglinearrcom, _vecCityName);
     ValueChangeOnAirLine(ui->chglinenocom->currentIndex() );
 
     //删除页面上的退票
@@ -197,7 +194,7 @@ int FlightManager::GetMaxNum(const QString& sql)
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (m_Connect->SelectResult(sqlquery, sql))
+        if (_connect->SelectResult(sqlquery, sql))
             sqlquery->next();
         else
             throw false;
@@ -226,7 +223,7 @@ bool FlightManager::GetCustomerType()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -237,8 +234,8 @@ bool FlightManager::GetCustomerType()
 
     while (sqlquery->next())
     {
-        m_CustomerType.append(sqlquery->value("customertypename").toString() );
-        m_TypeDiscount.insert(sqlquery->value("customertypename").toString(), sqlquery->value("discountpercent").toString().toInt() );
+        _vecCustomerType.append(sqlquery->value("customertypename").toString() );
+        _mapTypeDiscount.insert(sqlquery->value("customertypename").toString(), sqlquery->value("discountpercent").toString().toInt() );
     }
 
     delete sqlquery;
@@ -253,7 +250,7 @@ bool FlightManager::GetAirWay()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -263,7 +260,7 @@ bool FlightManager::GetAirWay()
     }
 
     while (sqlquery->next())
-        m_Airway.append(sqlquery->value(0).toString());
+        _vecAirway.append(sqlquery->value(0).toString());
 
     delete sqlquery;
     sqlquery = NULL;
@@ -277,7 +274,7 @@ bool FlightManager::GetCity()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -291,12 +288,12 @@ bool FlightManager::GetCity()
         City city;
         city.country_no = sqlquery->value("countryno").toString().toInt();
         city.country_name = sqlquery->value("countryname").toString();
-        if (0 > m_Country_Name.indexOf(city.country_name))
-            m_Country_Name.append(city.country_name);
+        if (0 > _vecCountryName.indexOf(city.country_name))
+            _vecCountryName.append(city.country_name);
         city.province = sqlquery->value("provincename").toString();
         city.city = sqlquery->value("cityname").toString();
-        m_City_Name.append(city.city);
-        m_City.append(city);
+        _vecCityName.append(city.city);
+        _vecCity.append(city);
     }
 
     delete sqlquery;
@@ -317,7 +314,7 @@ bool FlightManager::GetCustomerInfo()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -326,16 +323,16 @@ bool FlightManager::GetCustomerInfo()
         return false;
     }
 
-    if (m_CustomerInfo.size())
-        m_CustomerInfo.clear();
-    if (m_CustomerNo.size())
-        m_CustomerNo.clear();
+    if (_vecCustomerInfo.size())
+        _vecCustomerInfo.clear();
+    if (_vecCustomerNo.size())
+        _vecCustomerNo.clear();
 
     while (sqlquery->next())
     {
         Customer ctm;
         ctm.no = sqlquery->value("customerno").toString().toInt();
-        m_CustomerNo.append(QString::number(ctm.no));
+        _vecCustomerNo.append(QString::number(ctm.no));
         ctm.name = sqlquery->value("customername").toString();
         ctm.type_no = sqlquery->value("customertypeno").toString().toInt();
         ctm.type_name = sqlquery->value("customertypename").toString();
@@ -343,7 +340,7 @@ bool FlightManager::GetCustomerInfo()
         ctm.id = sqlquery->value("identifynum").toString();
         ctm.sex = sqlquery->value("sex").toString();
         ctm.phone = sqlquery->value("phonenum").toString();
-        m_CustomerInfo.append(ctm);
+        _vecCustomerInfo.append(ctm);
     }
 
     delete sqlquery;
@@ -354,10 +351,10 @@ bool FlightManager::GetCustomerInfo()
 
 void FlightManager::CustomerValueChange(const int& order)
 {
-    ui->chgctmnameline->setText(m_CustomerInfo[order].name);
-    ui->chgctmsexcom->setCurrentText(m_CustomerInfo[order].sex);
-    ui->chgctmpheline->setText(m_CustomerInfo[order].phone);
-    ui->chgctmtypcom->setCurrentText(m_CustomerInfo[order].type_name);
+    ui->chgctmnameline->setText(_vecCustomerInfo[order].name);
+    ui->chgctmsexcom->setCurrentText(_vecCustomerInfo[order].sex);
+    ui->chgctmpheline->setText(_vecCustomerInfo[order].phone);
+    ui->chgctmtypcom->setCurrentText(_vecCustomerInfo[order].type_name);
 }
 
 bool FlightManager::GetAirPlaneChange()
@@ -370,7 +367,7 @@ bool FlightManager::GetAirPlaneChange()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -379,8 +376,8 @@ bool FlightManager::GetAirPlaneChange()
         return false;
     }
 
-    if (m_PlaneInfo.size())
-        m_PlaneInfo.clear();
+    if (_vecPlaneInfo.size())
+        _vecPlaneInfo.clear();
 
     while (sqlquery->next())
     {
@@ -392,7 +389,7 @@ bool FlightManager::GetAirPlaneChange()
         plane.arrive = sqlquery->value("arrivecity").toString();
         plane.date = sqlquery->value("departuredate").toString();
         plane.time = sqlquery->value("departuretime").toString();
-        m_PlaneInfo.append(plane);
+        _vecPlaneInfo.append(plane);
     }
 
     delete sqlquery;
@@ -403,10 +400,10 @@ bool FlightManager::GetAirPlaneChange()
 
 void FlightManager::PlaneValueChange(const int& index)
 {
-    ui->chgplanetype->setText(m_PlaneInfo[index].plane_type);
-    ui->chgplanedep->setText(m_PlaneInfo[index].departure);
-    ui->chgplanearr->setText(m_PlaneInfo[index].arrive);
-    ui->chgplanenotime->setText(m_PlaneInfo[index].date + "\n" + m_PlaneInfo[index].time);
+    ui->chgplanetype->setText(_vecPlaneInfo[index].plane_type);
+    ui->chgplanedep->setText(_vecPlaneInfo[index].departure);
+    ui->chgplanearr->setText(_vecPlaneInfo[index].arrive);
+    ui->chgplanenotime->setText(_vecPlaneInfo[index].date + "\n" + _vecPlaneInfo[index].time);
 }
 
 bool FlightManager::GetAirLineInfo()
@@ -419,7 +416,7 @@ bool FlightManager::GetAirLineInfo()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -428,8 +425,8 @@ bool FlightManager::GetAirLineInfo()
         return false;
     }
 
-    if (m_LineInfo.size())
-        m_LineInfo.clear();
+    if (_vecLineInfo.size())
+        _vecLineInfo.clear();
 
     while (sqlquery->next())
     {
@@ -446,14 +443,14 @@ bool FlightManager::GetAirLineInfo()
         line.arrive_time = sqlquery->value("arrivetime").toString();
         line.econemy_price = sqlquery->value("economyclassprice").toString().toInt();
         line.econemy_num = sqlquery->value("economyclassnum").toString().toInt();
-        line.econemy_rest = line.econemy_num - m_Connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 3)");
+        line.econemy_rest = line.econemy_num - _connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 3)");
         line.bussiness_price = sqlquery->value("businessclassprice").toString().toInt();
         line.bussiness_num = sqlquery->value("businessclassnum").toString().toInt();
-        line.bussiness_rest = line.bussiness_num - m_Connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 2)");
+        line.bussiness_rest = line.bussiness_num - _connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 2)");
         line.deluxe_price = sqlquery->value("deluxeclassprice").toString().toInt();
         line.deluxe_num = sqlquery->value("deluxeclassnum").toString().toInt();
-        line.deluxe_rest = line.deluxe_num - m_Connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 2)");
-        m_LineInfo.append(line);
+        line.deluxe_rest = line.deluxe_num - _connect->CallPro(QString("CALL pro_count_ticket(") + QString::number(line.line_no) + ", 2)");
+        _vecLineInfo.append(line);
     }
 
     delete sqlquery;
@@ -464,10 +461,10 @@ bool FlightManager::GetAirLineInfo()
 
 void FlightManager::LineChangeOnPlane(const int& index)
 {
-    ui->chgplanelinecpy->setText(m_LineInfo[index].airway_short_name);
-    ui->chgplanelinedep->setText(m_LineInfo[index].departure_city);
-    ui->chgplanelinearr->setText(m_LineInfo[index].arrive_city);
-    ui->chgplanelinetime->setText(m_LineInfo[index].departure_date + "\n" + m_LineInfo[index].departure_time);
+    ui->chgplanelinecpy->setText(_vecLineInfo[index].airway_short_name);
+    ui->chgplanelinedep->setText(_vecLineInfo[index].departure_city);
+    ui->chgplanelinearr->setText(_vecLineInfo[index].arrive_city);
+    ui->chgplanelinetime->setText(_vecLineInfo[index].departure_date + "\n" + _vecLineInfo[index].departure_time);
 }
 
 bool FlightManager::GetTicket()
@@ -480,7 +477,7 @@ bool FlightManager::GetTicket()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -489,8 +486,8 @@ bool FlightManager::GetTicket()
         return false;
     }
 
-    if (m_TicketInfo.size())
-        m_TicketInfo.clear();
+    if (_vecTicketInfo.size())
+        _vecTicketInfo.clear();
 
     while (sqlquery->next())
     {
@@ -504,7 +501,7 @@ bool FlightManager::GetTicket()
         ticket.time = sqlquery->value("departuretime").toString();
         ticket.ship_no = sqlquery->value("shipno").toString().toInt();
         ticket.ship_name = sqlquery->value("shipname").toString();
-        m_TicketInfo.append(ticket);
+        _vecTicketInfo.append(ticket);
     }
 
     delete sqlquery;
@@ -515,11 +512,11 @@ bool FlightManager::GetTicket()
 
 void FlightManager::TicketValueChangeOnUpdate(const int &index)
 {
-    ui->chgtktlineabl->setText(QString::number(m_TicketInfo[index].airline_no) );
-    ui->chgtktdepabl->setText(m_TicketInfo[index].departure);
-    ui->chgtktarrabl->setText(m_TicketInfo[index].arrive);
-    ui->chgtkttimeabl->setText(m_TicketInfo[index].date + "\n" + m_TicketInfo[index].time);
-    ui->chgtktshipabl->setText(m_TicketInfo[index].ship_name);
+    ui->chgtktlineabl->setText(QString::number(_vecTicketInfo[index].airline_no) );
+    ui->chgtktdepabl->setText(_vecTicketInfo[index].departure);
+    ui->chgtktarrabl->setText(_vecTicketInfo[index].arrive);
+    ui->chgtkttimeabl->setText(_vecTicketInfo[index].date + "\n" + _vecTicketInfo[index].time);
+    ui->chgtktshipabl->setText(_vecTicketInfo[index].ship_name);
 }
 
 bool FlightManager::GetShip()
@@ -528,7 +525,7 @@ bool FlightManager::GetShip()
     QSqlQuery* sqlquery = new QSqlQuery;
     try
     {
-        if (!m_Connect->SelectResult(sqlquery, sql))
+        if (!_connect->SelectResult(sqlquery, sql))
             throw false;
     }
     catch (bool&)
@@ -538,7 +535,7 @@ bool FlightManager::GetShip()
     }
 
     while (sqlquery->next())
-        m_Ship.append(sqlquery->value(0).toString());
+        _vecShip.append(sqlquery->value(0).toString());
 
     delete sqlquery;
     sqlquery = NULL;
@@ -548,18 +545,18 @@ bool FlightManager::GetShip()
 
 void FlightManager::LineChangeOnTicket(const int &index)
 {
-    ui->chgtktdepature->setText(m_LineInfo[index].departure_city);
-    ui->chgtktarrive->setText(m_LineInfo[index].arrive_city);
-    ui->chgtkttime->setText(m_LineInfo[index].departure_date + "\n" + m_LineInfo[index].departure_time);
+    ui->chgtktdepature->setText(_vecLineInfo[index].departure_city);
+    ui->chgtktarrive->setText(_vecLineInfo[index].arrive_city);
+    ui->chgtkttime->setText(_vecLineInfo[index].departure_date + "\n" + _vecLineInfo[index].departure_time);
 }
 
 void FlightManager::ValueChangeOnAirLine(const int& index)
 {
-    ui->chglinecmpcom->setCurrentText(m_LineInfo[index].airway_short_name);
-    ui->chglinedepcom->setCurrentText(m_LineInfo[index].departure_city);
-    ui->chglinearrcom->setCurrentText(m_LineInfo[index].arrive_city);
+    ui->chglinecmpcom->setCurrentText(_vecLineInfo[index].airway_short_name);
+    ui->chglinedepcom->setCurrentText(_vecLineInfo[index].departure_city);
+    ui->chglinearrcom->setCurrentText(_vecLineInfo[index].arrive_city);
 
-    QStringList datelist = m_LineInfo[index].departure_date.split("-");
+    QStringList datelist = _vecLineInfo[index].departure_date.split("-");
     int indate[3];
     int i = 0;
 
@@ -571,82 +568,82 @@ void FlightManager::ValueChangeOnAirLine(const int& index)
 
     QDate date(indate[0], indate[1], indate[2]);
     ui->chglinedatedit->setDate(date);
-    QTime time = QTime::fromString(m_LineInfo[index].departure_time);
+    QTime time = QTime::fromString(_vecLineInfo[index].departure_time);
 
     ui->chglinetimedit->setTime(time);
-    ui->chglineecoedit->setText(QString::number(m_LineInfo[index].econemy_price));
-    ui->chglinebusedit->setText(QString::number(m_LineInfo[index].bussiness_price));
-    ui->chglinedeledit->setText(QString::number(m_LineInfo[index].deluxe_price));
+    ui->chglineecoedit->setText(QString::number(_vecLineInfo[index].econemy_price));
+    ui->chglinebusedit->setText(QString::number(_vecLineInfo[index].bussiness_price));
+    ui->chglinedeledit->setText(QString::number(_vecLineInfo[index].deluxe_price));
 }
 
 void FlightManager::TicketValueChangeOnDelete(const int& index)
 {
-    ui->delticketname->setText(m_TicketInfo[index].customer_name);
-    ui->delticketlineno->setText(QString::number(m_TicketInfo[index].airline_no));
-    ui->delticketdep->setText(m_TicketInfo[index].departure);
-    ui->delticketarr->setText(m_TicketInfo[index].arrive);
-    ui->delticketdeptime->setText(m_TicketInfo[index].date + "\n" + m_TicketInfo[index].time);
-    ui->delticketship->setText(m_TicketInfo[index].ship_name);
+    ui->delticketname->setText(_vecTicketInfo[index].customer_name);
+    ui->delticketlineno->setText(QString::number(_vecTicketInfo[index].airline_no));
+    ui->delticketdep->setText(_vecTicketInfo[index].departure);
+    ui->delticketarr->setText(_vecTicketInfo[index].arrive);
+    ui->delticketdeptime->setText(_vecTicketInfo[index].date + "\n" + _vecTicketInfo[index].time);
+    ui->delticketship->setText(_vecTicketInfo[index].ship_name);
 }
 
 void FlightManager::SetCustomerInfoOnBook(const int& index)
 {
-    ui->bktktctmname->setText(m_CustomerInfo[index].name);
-    ui->bktktctmtyp->setText(m_CustomerInfo[index].type_name);
-    ui->bktktdiscot->setText(QString::number(m_CustomerInfo[index].discount) );
+    ui->bktktctmname->setText(_vecCustomerInfo[index].name);
+    ui->bktktctmtyp->setText(_vecCustomerInfo[index].type_name);
+    ui->bktktdiscot->setText(QString::number(_vecCustomerInfo[index].discount) );
 }
 
 void FlightManager::SetCityOnBook(QComboBox* combobox, const QString &index)
 {
     combobox->clear();
-    for (int i = 0; i < m_City.size(); ++i)
-        if (index == m_City[i].country_name)
-            if ("" == m_City[i].province)
-                combobox->addItem(m_City[i].city);
+    for (int i = 0; i < _vecCity.size(); ++i)
+        if (index == _vecCity[i].country_name)
+            if ("" == _vecCity[i].province)
+                combobox->addItem(_vecCity[i].city);
             else
-                combobox->addItem(m_City[i].city + ", " + m_City[i].province);
+                combobox->addItem(_vecCity[i].city + ", " + _vecCity[i].province);
 }
 
 void FlightManager::ShowAirLineOnSearch()
 {
-    ui->searchairlineshow->setRowCount(m_LineInfo.size());
-    for (int i = 0; i < m_LineInfo.size(); ++i)
+    ui->searchairlineshow->setRowCount(_vecLineInfo.size());
+    for (int i = 0; i < _vecLineInfo.size(); ++i)
     {
-        ui->searchairlineshow->setItem(i, 0, new QTableWidgetItem(QString::number(m_LineInfo[i].line_no)) );
-        ui->searchairlineshow->setItem(i, 1, new QTableWidgetItem(m_LineInfo[i].airway_short_name) );
-        ui->searchairlineshow->setItem(i, 2, new QTableWidgetItem(m_LineInfo[i].airplane_type) );
-        ui->searchairlineshow->setItem(i, 3, new QTableWidgetItem(m_LineInfo[i].departure_country) );
-        ui->searchairlineshow->setItem(i, 4, new QTableWidgetItem(m_LineInfo[i].departure_city) );
-        ui->searchairlineshow->setItem(i, 5, new QTableWidgetItem(m_LineInfo[i].arrive_country) );
-        ui->searchairlineshow->setItem(i, 6, new QTableWidgetItem(m_LineInfo[i].arrive_city) );
-        ui->searchairlineshow->setItem(i, 7, new QTableWidgetItem(m_LineInfo[i].departure_date) );
-        ui->searchairlineshow->setItem(i, 8, new QTableWidgetItem(m_LineInfo[i].departure_time) );
-        ui->searchairlineshow->setItem(i, 9, new QTableWidgetItem(m_LineInfo[i].arrive_time) );
-        ui->searchairlineshow->setItem(i, 10, new QTableWidgetItem(QString::number(m_LineInfo[i].econemy_price)) );
-        ui->searchairlineshow->setItem(i, 11, new QTableWidgetItem(QString::number(m_LineInfo[i].econemy_num)) );
-        ui->searchairlineshow->setItem(i, 12, new QTableWidgetItem(QString::number(m_LineInfo[i].econemy_rest)) );
-        ui->searchairlineshow->setItem(i, 13, new QTableWidgetItem(QString::number(m_LineInfo[i].bussiness_price)) );
-        ui->searchairlineshow->setItem(i, 14, new QTableWidgetItem(QString::number(m_LineInfo[i].bussiness_num)) );
-        ui->searchairlineshow->setItem(i, 15, new QTableWidgetItem(QString::number(m_LineInfo[i].bussiness_rest)) );
-        ui->searchairlineshow->setItem(i, 16, new QTableWidgetItem(QString::number(m_LineInfo[i].deluxe_price)) );
-        ui->searchairlineshow->setItem(i, 17, new QTableWidgetItem(QString::number(m_LineInfo[i].deluxe_num)) );
-        ui->searchairlineshow->setItem(i, 18, new QTableWidgetItem(QString::number(m_LineInfo[i].deluxe_rest)) );
+        ui->searchairlineshow->setItem(i, 0, new QTableWidgetItem(QString::number(_vecLineInfo[i].line_no)) );
+        ui->searchairlineshow->setItem(i, 1, new QTableWidgetItem(_vecLineInfo[i].airway_short_name) );
+        ui->searchairlineshow->setItem(i, 2, new QTableWidgetItem(_vecLineInfo[i].airplane_type) );
+        ui->searchairlineshow->setItem(i, 3, new QTableWidgetItem(_vecLineInfo[i].departure_country) );
+        ui->searchairlineshow->setItem(i, 4, new QTableWidgetItem(_vecLineInfo[i].departure_city) );
+        ui->searchairlineshow->setItem(i, 5, new QTableWidgetItem(_vecLineInfo[i].arrive_country) );
+        ui->searchairlineshow->setItem(i, 6, new QTableWidgetItem(_vecLineInfo[i].arrive_city) );
+        ui->searchairlineshow->setItem(i, 7, new QTableWidgetItem(_vecLineInfo[i].departure_date) );
+        ui->searchairlineshow->setItem(i, 8, new QTableWidgetItem(_vecLineInfo[i].departure_time) );
+        ui->searchairlineshow->setItem(i, 9, new QTableWidgetItem(_vecLineInfo[i].arrive_time) );
+        ui->searchairlineshow->setItem(i, 10, new QTableWidgetItem(QString::number(_vecLineInfo[i].econemy_price)) );
+        ui->searchairlineshow->setItem(i, 11, new QTableWidgetItem(QString::number(_vecLineInfo[i].econemy_num)) );
+        ui->searchairlineshow->setItem(i, 12, new QTableWidgetItem(QString::number(_vecLineInfo[i].econemy_rest)) );
+        ui->searchairlineshow->setItem(i, 13, new QTableWidgetItem(QString::number(_vecLineInfo[i].bussiness_price)) );
+        ui->searchairlineshow->setItem(i, 14, new QTableWidgetItem(QString::number(_vecLineInfo[i].bussiness_num)) );
+        ui->searchairlineshow->setItem(i, 15, new QTableWidgetItem(QString::number(_vecLineInfo[i].bussiness_rest)) );
+        ui->searchairlineshow->setItem(i, 16, new QTableWidgetItem(QString::number(_vecLineInfo[i].deluxe_price)) );
+        ui->searchairlineshow->setItem(i, 17, new QTableWidgetItem(QString::number(_vecLineInfo[i].deluxe_num)) );
+        ui->searchairlineshow->setItem(i, 18, new QTableWidgetItem(QString::number(_vecLineInfo[i].deluxe_rest)) );
     }
 }
 
 void FlightManager::ShowCustomerOnSearch()
 {
-    ui->searchcustomershow->setRowCount(m_CustomerInfo.size());
-    for (int i = 0; i < m_CustomerInfo.size(); ++i)
+    ui->searchcustomershow->setRowCount(_vecCustomerInfo.size());
+    for (int i = 0; i < _vecCustomerInfo.size(); ++i)
     {
-        ui->searchcustomershow->setItem(i, 0, new QTableWidgetItem(QString::number(m_CustomerInfo[i].no)) );
-        ui->searchcustomershow->setItem(i, 1, new QTableWidgetItem(m_CustomerInfo[i].name) );
-        ui->searchcustomershow->setItem(i, 2, new QTableWidgetItem(QString::number(m_CustomerInfo[i].type_no)) );
-        ui->searchcustomershow->setItem(i, 3, new QTableWidgetItem(m_CustomerInfo[i].type_name) );
-        ui->searchcustomershow->setItem(i, 4, new QTableWidgetItem(QString::number(m_CustomerInfo[i].discount)) );
-        ui->searchcustomershow->setItem(i, 5, new QTableWidgetItem(m_CustomerInfo[i].id) );
-        ui->searchcustomershow->setItem(i, 6, new QTableWidgetItem(m_CustomerInfo[i].sex) );
-        ui->searchcustomershow->setItem(i, 7, new QTableWidgetItem(m_CustomerInfo[i].phone) );
+        ui->searchcustomershow->setItem(i, 0, new QTableWidgetItem(QString::number(_vecCustomerInfo[i].no)) );
+        ui->searchcustomershow->setItem(i, 1, new QTableWidgetItem(_vecCustomerInfo[i].name) );
+        ui->searchcustomershow->setItem(i, 2, new QTableWidgetItem(QString::number(_vecCustomerInfo[i].type_no)) );
+        ui->searchcustomershow->setItem(i, 3, new QTableWidgetItem(_vecCustomerInfo[i].type_name) );
+        ui->searchcustomershow->setItem(i, 4, new QTableWidgetItem(QString::number(_vecCustomerInfo[i].discount)) );
+        ui->searchcustomershow->setItem(i, 5, new QTableWidgetItem(_vecCustomerInfo[i].id) );
+        ui->searchcustomershow->setItem(i, 6, new QTableWidgetItem(_vecCustomerInfo[i].sex) );
+        ui->searchcustomershow->setItem(i, 7, new QTableWidgetItem(_vecCustomerInfo[i].phone) );
     }
 }
 
@@ -690,13 +687,13 @@ void FlightManager::ShowCustomerOnSearch()
 
 void FlightManager::closeEvent(QCloseEvent *)
 {
-    cout << "Close FlightManger" << endl;
+    std::cout << "Close FlightManger" << std::endl;
 }
 
 //公共槽，用于接收登陆界面的信号，接收到信号后就显示主界面
 void FlightManager::receive()
 {
-    cout << "FlightManager Show" << endl;
+    std::cout << "FlightManager Show" << std::endl;
     show();
 }
 
@@ -736,9 +733,9 @@ void FlightManager::on_inserttab_tabBarClicked(int index)
     {
         JudgeReturnValue(ui->newnoshow, GetMaxNum("SELECT * FROM vi_customernum"));
         ui->newtypeselect->clear();
-        if (!m_CustomerType.size())
+        if (!_vecCustomerType.size())
             GetCustomerType();
-        for (QString str : m_CustomerType)
+        for (QString str : _vecCustomerType)
             ui->newtypeselect->addItem(str);
     }
 }
@@ -761,7 +758,7 @@ void FlightManager::on_newokbutton_clicked()
     insertstr.append(phone);
 
     QString sql = "INSERT INTO customer VALUES (?, ?, ?, ?, ?, ?)";
-    QString rtn = m_Connect->InsertValue(sql, 6, insertstr);
+    QString rtn = _connect->InsertValue(sql, 6, insertstr);
     try
     {
         if ("Success" != rtn)
@@ -861,7 +858,7 @@ void FlightManager::on_chgctmokbtn_clicked()
     udtsql.append(udtphe);
     udtsql.append(udtsex);
     udtsql.append(udttye);
-    QString rtn = m_Connect->UpdateValue(udtsql);
+    QString rtn = _connect->UpdateValue(udtsql);
     if (rtn == "Success")
         QMessageBox(QMessageBox::Information, "成功", "更新成功", QMessageBox::Ok).exec();
     else
@@ -896,7 +893,7 @@ void FlightManager::on_chgplaneokbtn_clicked()
 
     QVector<QString> plane_sql;
     plane_sql.append(sql);
-    QString rtn = m_Connect->UpdateValue(plane_sql);
+    QString rtn = _connect->UpdateValue(plane_sql);
     if (rtn == "Success")
         QMessageBox(QMessageBox::Information, "成功", "更新成功", QMessageBox::Ok).exec();
     else
@@ -905,7 +902,7 @@ void FlightManager::on_chgplaneokbtn_clicked()
 
 void FlightManager::on_chgtypselcom_activated(const QString &arg1)
 {
-    ui->chgtypinline->setPlaceholderText(QString::number(m_TypeDiscount[arg1]) );
+    ui->chgtypinline->setPlaceholderText(QString::number(_mapTypeDiscount[arg1]) );
 }
 
 void FlightManager::on_chgtypokbtn_clicked()
@@ -922,7 +919,7 @@ void FlightManager::on_chgtypokbtn_clicked()
                 + " WHERE customertypename = '" + ui->chgtypselcom->currentText() + "'";
         QVector<QString> discount_sql;
         discount_sql.append(sql);
-        QString rtn = m_Connect->UpdateValue(discount_sql);
+        QString rtn = _connect->UpdateValue(discount_sql);
         if (rtn == "Success")
             QMessageBox(QMessageBox::Information, "成功", "更新成功", QMessageBox::Ok).exec();
         else
@@ -946,8 +943,8 @@ void FlightManager::on_chgtktokbtn_clicked()
     int line = ui->chgtktlinecom->currentText().toInt();
     int ship = ui->chgtktshipcom->currentIndex() + 1;
 
-    bool chg_line = line != m_TicketInfo[book_num].airline_no ? true : false;
-    bool chg_ship = ship != m_TicketInfo[book_num].ship_no ? true :false;
+    bool chg_line = line != _vecTicketInfo[book_num].airline_no ? true : false;
+    bool chg_ship = ship != _vecTicketInfo[book_num].ship_no ? true :false;
 
     if (!chg_line && !chg_ship)
     {
@@ -960,7 +957,7 @@ void FlightManager::on_chgtktokbtn_clicked()
         QSqlQuery* sqlquery = new QSqlQuery;
         try
         {
-            if (!m_Connect->SelectResult(sqlquery, search_line_ship))
+            if (!_connect->SelectResult(sqlquery, search_line_ship))
                 throw false;
         }
         catch (bool&)
@@ -1007,7 +1004,7 @@ void FlightManager::on_chgtktokbtn_clicked()
             vec_sql.append(line_sql);
         }
 
-        QString rtn = m_Connect->UpdateValue(vec_sql);
+        QString rtn = _connect->UpdateValue(vec_sql);
         if (rtn == "Success")
             QMessageBox(QMessageBox::Information, "成功", "更新成功", QMessageBox::Ok).exec();
         else
@@ -1159,7 +1156,7 @@ void FlightManager::on_chglineokbtn_clicked()
     udtsql.append(udtbus);
     udtsql.append(udtdel);
 
-    QString rtn = m_Connect->UpdateValue(udtsql);
+    QString rtn = _connect->UpdateValue(udtsql);
     if (rtn == "Success")
         QMessageBox(QMessageBox::Information, "成功", "更新成功", QMessageBox::Ok).exec();
     else
@@ -1176,7 +1173,7 @@ void FlightManager::on_delticketokbtn_clicked()
     QString ticket_no = ui->delticketno->currentText();
     QString sql = "DELETE FROM bookticket WHERE booknum = " + ticket_no;
 
-    QString rtn = m_Connect->DeletValue(sql);
+    QString rtn = _connect->DeletValue(sql);
     if (rtn == "Success")
         QMessageBox(QMessageBox::Information, "成功", "删除成功", QMessageBox::Ok).exec();
     else
@@ -1227,7 +1224,7 @@ void FlightManager::on_bktktarrcy_currentIndexChanged(const QString &arg1)
     GetAirLineInfo();
     ui->bktktline->clear();
 
-    for (AirLine airline : m_LineInfo)
+    for (AirLine airline : _vecLineInfo)
         if (departure == airline.departure_city && arrive == airline.arrive_city)
             ui->bktktline->addItem(QString::number(airline.line_no));
 }

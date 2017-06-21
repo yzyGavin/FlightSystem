@@ -1,14 +1,14 @@
-#include "connectdatabase.h"
+#include "ConnectDataBase.h"
 
 #include <iostream>
 
 ConnectDataBase::ConnectDataBase()
 {
-    m_DataBase = QSqlDatabase::addDatabase("QMYSQL");
-    m_DataBase.setHostName("localhost");
-    m_DataBase.setDatabaseName("flight_management_system");
-    m_DataBase.setUserName("root");
-    m_DataBase.setPassword("12345678");
+    _dataBase = QSqlDatabase::addDatabase("QMYSQL");
+    _dataBase.setHostName("localhost");
+    _dataBase.setDatabaseName("flight_management_system");
+    _dataBase.setUserName("root");
+    _dataBase.setPassword("12345678");
 
     try
     {
@@ -18,14 +18,14 @@ ConnectDataBase::ConnectDataBase()
     catch (bool&)
     {
         std::cout << "数据库连接错误，请查看网络连接是否正确" << std::endl;
-        std::cout << m_DataBase.lastError().text().toStdString() << std::endl;
+        std::cout << _dataBase.lastError().text().toStdString() << std::endl;
         exit(0);
     }
 }
 
 bool ConnectDataBase::OpenDataBase()
 {
-    return m_DataBase.open();
+    return _dataBase.open();
 }
 
 bool ConnectDataBase::SelectResult(QSqlQuery* sqlquery, const QString& sql)

@@ -1,2 +1,4 @@
 .DS_Store
-FlightManagerSystem.pro.user
+*.pro.user
+build-FlightManagerSystem-*/
+bin/

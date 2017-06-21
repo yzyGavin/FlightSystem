@@ -1,5 +1,5 @@
-#ifndef CONNECTDATABASE_H
-#define CONNECTDATABASE_H
+#ifndef _CONNECT_DATABASE_H
+#define _CONNECT_DATABASE_H
 
 #include <QtSql>
 #include <QSqlQuery>
@@ -12,7 +12,7 @@ class ConnectDataBase
 public:
     static ConnectDataBase* GetInstance()
     {
-        return m_Instance;
+        return _instance;
     }
 
     bool OpenDataBase();
@@ -29,10 +29,10 @@ private:
     public:
         ~GC()
         {
-            if (!m_Instance)
+            if (!_instance)
             {
-                delete m_Instance;
-                m_Instance = NULL;
+                delete _instance;
+                _instance = NULL;
             }
         }
     };
@@ -40,8 +40,8 @@ private:
 
     ConnectDataBase();
 
-    static ConnectDataBase* m_Instance;
-    QSqlDatabase m_DataBase;
+    static ConnectDataBase* _instance;
+    QSqlDatabase _dataBase;
 };
 
 #endif // CONNECTDATABASE_H

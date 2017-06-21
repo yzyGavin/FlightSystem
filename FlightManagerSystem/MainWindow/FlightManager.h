@@ -7,7 +7,7 @@
 #include <QVector>
 #include <QMainWindow>
 #include <QMessageBox>
-#include "connectdatabase.h"
+#include "ConnectDataBase.h"
 
 namespace Ui
 {
@@ -172,23 +172,24 @@ private:
         QString city;
     };
 
-    Ui::FlightManager *ui;
-    ConnectDataBase* m_Connect;
-    QMap<QString, int> m_TypeDiscount;//存放客户类型优惠
+private:
+    Ui::FlightManager* ui;
+    ConnectDataBase* _connect;
+    QMap<QString, int> _mapTypeDiscount;//存放客户类型优惠
 
-    QVector<QString> m_CustomerType;//存放客户类型
-    QVector<QString> m_Sex;//存放性别
-    QVector<QString> m_CustomerNo;//存放更改页面上客户信息的编号
-    QVector<QString> m_Ship;//存放舱位等级
-    QVector<QString> m_Airway;//存放航空公司
-    QVector<QString> m_Country_Name;//存放国家名
-    QVector<QString> m_City_Name;//存放城市名
+    QVector<QString> _vecCustomerType;//存放客户类型
+    QVector<QString> _vecSex;//存放性别
+    QVector<QString> _vecCustomerNo;//存放更改页面上客户信息的编号
+    QVector<QString> _vecShip;//存放舱位等级
+    QVector<QString> _vecAirway;//存放航空公司
+    QVector<QString> _vecCountryName;//存放国家名
+    QVector<QString> _vecCityName;//存放城市名
 
-    QVector<Customer> m_CustomerInfo;//存放更改页面上的客户信息
-    QVector<AirPlane> m_PlaneInfo;//存放更改页面上客机信息中的客机信息
-    QVector<AirLine> m_LineInfo;//存放更改页面客机信息中的航线信息
-    QVector<Ticket> m_TicketInfo;//存放更改页面订票信息
-    QVector<City> m_City;//存放城市、州、省、国家信息
+    QVector<Customer> _vecCustomerInfo;//存放更改页面上的客户信息
+    QVector<AirPlane> _vecPlaneInfo;//存放更改页面上客机信息中的客机信息
+    QVector<AirLine> _vecLineInfo;//存放更改页面客机信息中的航线信息
+    QVector<Ticket> _vecTicketInfo;//存放更改页面订票信息
+    QVector<City> _vecCity;//存放城市、州、省、国家信息
 };
 
 #endif // FLIGHTMANAGER_H

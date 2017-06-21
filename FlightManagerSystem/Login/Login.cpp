@@ -1,9 +1,7 @@
-#include "login.h"
+#include "Login.h"
 #include "ui_login.h"
 
 #include <iostream>
-using std::cout;
-using std::endl;
 
 Login::Login(QWidget *parent) :
     QDialog(parent),
@@ -13,9 +11,11 @@ Login::Login(QWidget *parent) :
     setWindowTitle("航空信息管理系统登陆");
     ui->passwordtext->setEchoMode(QLineEdit::Password);
 
-    m_Connect = ConnectDataBase::GetInstance();
+    _connect = ConnectDataBase::GetInstance();
 
     //当自定义信号发出时，关闭此对话框并销毁该对话框的内存
+//    connect(this, &Login::send, this, &Login::close);
+//    connect(this, &Login::send, this, &Login::deleteLater);
     connect(this, SIGNAL(send()), this, SLOT(close()) );
     connect(this, SIGNAL(send()), this, SLOT(deleteLater()) );
 }
@@ -23,7 +23,7 @@ Login::Login(QWidget *parent) :
 Login::~Login()
 {
     delete ui;
-    cout << "delete Login" << endl;
+    std::cout << "delete Login" << std::endl;
 }
 
 int Login::CheckWriting()
@@ -58,7 +58,7 @@ int Login::CheckAccount()
     try
     {
         //返回的数据集停在第一条记录前，必须执行next或first后才能指向第一条记录
-        if (m_Connect->SelectResult(sqlquery, sql) )
+        if (_connect->SelectResult(sqlquery, sql) )
             sqlquery->next();
         else
             throw false;
@@ -85,6 +85,14 @@ int Login::CheckAccount()
         return PasswordWrong;
 }
 
+/*
+ * 登陆密码
+ * aaa - bbb
+ * bbb - aaa
+ * ccc - ddd
+ * ddd - ccc
+ * fff - lll
+ */
 unsigned int Login::BKDRHash(char* str)
 {
     unsigned int seed = 131; // 31 131 1313 13131 131313 etc..

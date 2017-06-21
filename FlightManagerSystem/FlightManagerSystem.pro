@@ -10,19 +10,32 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = FlightManagerSystem
 TEMPLATE = app
+
+unix{
+DESTDIR +=  $$PWD/bin/
+}
+
+win32{
+CONFIG(release, debug | release):{
+DESTDIR +=  $$PWD/bin/Release/
+}else {
+DESTDIR +=  $$PWD/bin/Debug/
+}
+}
+
 INCLUDEPATH +=  . \
                 ./Connect/ \
                 ./Login/ \
                 ./MainWindow
 
 SOURCES +=  main.cpp \
-            Login/login.cpp \
-            Connect/connectdatabase.cpp \
-            MainWindow/flightmanager.cpp
+            Connect/ConnectDataBase.cpp \
+            MainWindow/FlightManager.cpp \
+            Login/Login.cpp
 
-HEADERS +=  Login/login.h \
-            Connect/connectdatabase.h \
-            MainWindow/flightmanager.h
+HEADERS +=  Connect/ConnectDataBase.h \
+            Login/Login.h \
+            MainWindow/FlightManager.h
 
-FORMS    += $$PWD/Login/login.ui \
-    MainWindow/flightmanager.ui
+FORMS    += Login/Login.ui \
+            MainWindow/FlightManager.ui

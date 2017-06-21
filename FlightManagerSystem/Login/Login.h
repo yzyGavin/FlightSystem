@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
-#include "connectdatabase.h"
+#include "ConnectDataBase.h"
 
 #include <cstdlib>
 
@@ -38,8 +38,9 @@ private slots:
 private:
     enum LoginType { Success, WebError, AccountBlank, AccountWrong, PasswordBlank, PasswordWrong, RepeatError };
 
-    Ui::Login *ui;
-    ConnectDataBase* m_Connect;
+private:
+    Ui::Login* ui;
+    ConnectDataBase* _connect;
 };
 
 #endif // LOGIN_H
