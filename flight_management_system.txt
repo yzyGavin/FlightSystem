@@ -1,0 +1,1022 @@
+-- MySQL dump 10.13  Distrib 5.7.18, for osx10.11 (x86_64)
+--
+-- Host: localhost    Database: flight_management_system
+-- ------------------------------------------------------
+-- Server version	5.7.18
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `account`
+--
+
+DROP TABLE IF EXISTS `account`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account` (
+  `account` varchar(30) NOT NULL,
+  `password` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account`
+--
+
+LOCK TABLES `account` WRITE;
+/*!40000 ALTER TABLE `account` DISABLE KEYS */;
+INSERT INTO `account` VALUES ('aaa',1694714),('bbb',1677421),('ccc',1729300),('ddd',1712007),('fff',1867644);
+/*!40000 ALTER TABLE `account` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `airline`
+--
+
+DROP TABLE IF EXISTS `airline`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `airline` (
+  `airlineno` smallint(6) NOT NULL,
+  `airwayshortname` char(5) NOT NULL,
+  `departurecity` varchar(50) DEFAULT NULL,
+  `arrivecity` varchar(50) DEFAULT NULL,
+  `departuredate` date DEFAULT NULL,
+  `departuretime` time DEFAULT NULL,
+  `arrivetime` time DEFAULT NULL,
+  `economyclassprice` smallint(6) DEFAULT NULL,
+  `businessclassprice` smallint(6) DEFAULT NULL,
+  `deluxeclassprice` smallint(6) DEFAULT NULL,
+  PRIMARY KEY (`airlineno`),
+  UNIQUE KEY `airlineno` (`airlineno`),
+  KEY `airwayshortname` (`airwayshortname`),
+  KEY `departurecity` (`departurecity`),
+  KEY `arrivecity` (`arrivecity`),
+  CONSTRAINT `airline_ibfk_1` FOREIGN KEY (`airwayshortname`) REFERENCES `airway` (`airwayshortname`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `airline_ibfk_2` FOREIGN KEY (`departurecity`) REFERENCES `city` (`cityname`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `airline_ibfk_3` FOREIGN KEY (`arrivecity`) REFERENCES `city` (`cityname`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `airline`
+--
+
+LOCK TABLES `airline` WRITE;
+/*!40000 ALTER TABLE `airline` DISABLE KEYS */;
+INSERT INTO `airline` VALUES (1,'CA','北京','Los Angeles','2019-04-12','08:00:00','18:00:00',5364,7943,12345),(2,'MU','广州','上海','2019-04-12','09:30:00','11:30:00',1243,3943,8943),(3,'CZ','深圳','长沙','2019-03-30','13:45:00','17:00:00',2345,5934,10331),(4,'FM','上海','哈尔滨','2019-03-30','12:45:00','14:50:00',1493,2849,5938),(5,'IV','厦门','西安','2019-05-22','15:25:00','17:05:00',2943,5943,10433),(6,'3U','西宁','成都','2019-04-02','07:15:00','13:30:00',3223,6443,9328),(7,'CA','上海','Berlin','2019-04-09','06:30:00','15:20:00',4326,8123,11383),(8,'WU','武汉','南宁','2019-05-10','10:25:00','16:20:00',3245,5983,8392),(9,'G4','哈尔滨','贵阳','2019-05-01','12:35:00','16:20:00',4938,9389,11944),(10,'WH','乌鲁木齐','兰州','2019-05-02','11:35:00','13:00:00',1234,3923,6943);
+/*!40000 ALTER TABLE `airline` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER tri_airline_ticket AFTER UPDATE
+ON airline FOR EACH ROW
+BEGIN
+  IF new.departurecity <> old.departurecity
+    THEN UPDATE bookticket
+          SET departurecity = new.departurecity, departurecountry = (SELECT countryno FROM city WHERE cityname = new.departurecity)
+          WHERE airlineno = new.airlineno;
+  END IF;
+  IF new.arrivecity <> old.arrivecity
+    THEN UPDATE bookticket
+          SET arrivecity = new.arrivecity, arrivecountry = (SELECT countryno FROM city WHERE cityname = new.arrivecity)
+          WHERE airlineno = new.airlineno;
+  END IF;
+  IF (SELECT shipno FROM bookticket WHERE airlineno = new.airlineno) = 1
+    THEN UPDATE bookticket
+          SET ticketprice = new.deluxeclassprice
+          WHERE airlineno = new.airlineno;
+  END IF;
+  IF (SELECT shipno FROM bookticket WHERE airlineno = new.airlineno) = 2
+    THEN UPDATE bookticket
+          SET ticketprice = new.businessclassprice
+          WHERE airlineno = new.airlineno;
+  END IF;
+  IF (SELECT shipno FROM bookticket WHERE airlineno = new.airlineno) = 3
+    THEN UPDATE bookticket
+          SET ticketprice = new.economyclassprice
+          WHERE airlineno = new.airlineno;
+  END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `airplane`
+--
+
+DROP TABLE IF EXISTS `airplane`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `airplane` (
+  `airplaneno` smallint(6) NOT NULL,
+  `airplanetype` varchar(50) NOT NULL,
+  `airlineno` smallint(6) DEFAULT NULL,
+  `buydate` date DEFAULT NULL,
+  `economyclassnum` smallint(6) DEFAULT NULL,
+  `businessclassnum` smallint(6) DEFAULT NULL,
+  `deluxeclassnum` smallint(6) DEFAULT NULL,
+  PRIMARY KEY (`airplaneno`),
+  UNIQUE KEY `airplaneno` (`airplaneno`),
+  KEY `airlineno` (`airlineno`),
+  CONSTRAINT `airplane_ibfk_1` FOREIGN KEY (`airlineno`) REFERENCES `airline` (`airlineno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `airplane`
+--
+
+LOCK TABLES `airplane` WRITE;
+/*!40000 ALTER TABLE `airplane` DISABLE KEYS */;
+INSERT INTO `airplane` VALUES (1,'A300-600',1,'1989-12-03',184,50,25),(2,'A310-300',2,'1994-02-06',200,70,30),(3,'A330-200',3,'1998-03-07',100,30,10),(4,'A330-300',4,'2003-07-04',150,40,20),(5,'A330-200F',5,'2007-01-06',200,100,30),(6,'A350-XWB',6,'1994-11-16',184,50,25),(7,'A380',7,'1995-10-17',100,30,10),(8,'B777',8,'1988-07-29',150,40,20),(9,'B747',9,'2005-04-26',200,70,30),(10,'B787',10,'2003-04-23',200,100,30);
+/*!40000 ALTER TABLE `airplane` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `airway`
+--
+
+DROP TABLE IF EXISTS `airway`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `airway` (
+  `airwayshortname` char(5) NOT NULL,
+  `airwayname` varchar(20) NOT NULL,
+  PRIMARY KEY (`airwayshortname`),
+  UNIQUE KEY `airwayshortname` (`airwayshortname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `airway`
+--
+
+LOCK TABLES `airway` WRITE;
+/*!40000 ALTER TABLE `airway` DISABLE KEYS */;
+INSERT INTO `airway` VALUES ('2Z','长安航空'),('3Q','云南航空'),('3U','四川航空'),('4G','深圳航空'),('8C','山西航空'),('CA','中国国际航空'),('CJ','中国北方航空'),('CZ','中国南方航空'),('F6','中国航空股份'),('FM','上海航空'),('G4','贵州航空'),('G8','长城航空'),('H4','海南航空'),('IV','福建航空'),('MF','厦门航空'),('MU','中国东方航空'),('SC','山东航空'),('SZ','中国西南航空'),('WH','中国西北航空'),('WU','武汉航空'),('X2','中国新华航空'),('XO','新疆航空'),('Z2','中原航空');
+/*!40000 ALTER TABLE `airway` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bookticket`
+--
+
+DROP TABLE IF EXISTS `bookticket`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bookticket` (
+  `booknum` int(11) NOT NULL,
+  `customerno` int(11) NOT NULL,
+  `customername` varchar(50) DEFAULT NULL,
+  `customertypeno` smallint(6) DEFAULT NULL,
+  `discountpercent` tinyint(4) DEFAULT NULL,
+  `airlineno` smallint(6) DEFAULT NULL,
+  `departurecountry` tinyint(3) unsigned DEFAULT NULL,
+  `departurecity` varchar(50) DEFAULT NULL,
+  `arrivecountry` tinyint(3) unsigned DEFAULT NULL,
+  `arrivecity` varchar(50) DEFAULT NULL,
+  `shipno` tinyint(4) DEFAULT NULL,
+  `ticketprice` smallint(6) DEFAULT NULL,
+  PRIMARY KEY (`booknum`),
+  UNIQUE KEY `booknum` (`booknum`),
+  KEY `customerno` (`customerno`),
+  KEY `customertypeno` (`customertypeno`),
+  KEY `airlineno` (`airlineno`),
+  KEY `departurecountry` (`departurecountry`),
+  KEY `arrivecountry` (`arrivecountry`),
+  KEY `departurecity` (`departurecity`),
+  KEY `arrivecity` (`arrivecity`),
+  KEY `shipno` (`shipno`),
+  CONSTRAINT `bookticket_ibfk_1` FOREIGN KEY (`customerno`) REFERENCES `customer` (`customerno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_2` FOREIGN KEY (`customertypeno`) REFERENCES `customertype` (`customertypeno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_3` FOREIGN KEY (`airlineno`) REFERENCES `airline` (`airlineno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_4` FOREIGN KEY (`departurecountry`) REFERENCES `country` (`countryno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_5` FOREIGN KEY (`arrivecountry`) REFERENCES `country` (`countryno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_6` FOREIGN KEY (`departurecity`) REFERENCES `city` (`cityname`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_7` FOREIGN KEY (`arrivecity`) REFERENCES `city` (`cityname`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookticket_ibfk_8` FOREIGN KEY (`shipno`) REFERENCES `shipspace` (`shipno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bookticket`
+--
+
+LOCK TABLES `bookticket` WRITE;
+/*!40000 ALTER TABLE `bookticket` DISABLE KEYS */;
+INSERT INTO `bookticket` VALUES (1,1,'王志龙',2,20,1,7,'北京',27,'Los Angeles',3,5364),(2,2,'林丽芬',2,20,2,7,'广州',7,'上海',3,1243),(3,3,'张越',2,20,3,7,'深圳',7,'长沙',2,5934),(4,4,'黄大芬',1,0,4,7,'上海',7,'哈尔滨',2,2849),(5,5,'李小克',1,0,5,7,'厦门',7,'西安',3,2943),(6,6,'林熙',2,20,6,7,'西宁',7,'成都',3,3223),(7,7,'邓建国',1,0,7,7,'上海',13,'Berlin',2,8123),(8,8,'张钊',1,0,8,7,'武汉',7,'南宁',3,3245),(9,9,'周小芳',1,0,9,7,'哈尔滨',7,'贵阳',3,4938),(10,10,'吴大卫',2,20,10,7,'乌鲁木齐',7,'兰州',2,3923);
+/*!40000 ALTER TABLE `bookticket` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `city`
+--
+
+DROP TABLE IF EXISTS `city`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `city` (
+  `cityname` varchar(50) NOT NULL,
+  `provincename` varchar(50) NOT NULL,
+  `countryno` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`cityname`),
+  KEY `countryno` (`countryno`),
+  CONSTRAINT `city_ibfk_1` FOREIGN KEY (`countryno`) REFERENCES `country` (`countryno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `city`
+--
+
+LOCK TABLES `city` WRITE;
+/*!40000 ALTER TABLE `city` DISABLE KEYS */;
+INSERT INTO `city` VALUES ('Atlanta','Georgia',27),('Berlin','',13),('Birmingham','',26),('Boston','Massachusetts',27),('Brussel','Region Brüssel-Hauptstadt',4),('Buenos Aires','',1),('Cambirdge','',26),('Chicago','Illinois',27),('Columbia','South Carolina',27),('Columbus','Ohio',27),('Denver','Colorado',27),('Dortmund','',13),('Frankfurt am Main','',13),('Hamburg','',13),('Houston','Texas',27),('Karlsruhe','',13),('Köln','',13),('Las Vegas','Nevada',27),('Leipzig','',13),('Los Angeles','California',27),('Manchester','',26),('Melbourne','Victoria',2),('München','',13),('New York','New York',27),('Nürnberg','',13),('Ottawa','',6),('Oxford','',26),('Philadephia','Pennsylvanis',27),('Phoenix','Arizona',27),('Sydney','New South Wales',2),('Vienna','Wean',3),('上海','',7),('乌鲁木齐','新疆',7),('佛山','广东',7),('兰州','甘肃',7),('北京','',7),('南京','江苏',7),('南宁','广西',7),('南昌','江西',7),('厦门','福建',7),('合肥','安徽',7),('呼和浩特','内蒙古',7),('哈尔滨','黑龙江',7),('太原','山西',7),('广州','广东',7),('成都','四川',7),('拉萨','西藏',7),('昆明','云南',7),('杭州','浙江',7),('武汉','湖北',7),('沈阳','辽宁',7),('济南','山东',7),('海口','海南',7),('深圳','广东',7),('石家庄','河北',7),('西宁','青海',7),('西安','陕西',7),('贵阳','贵州',7),('郑州','河南',7),('银川','宁夏',7),('长春','吉林',7),('长沙','湖南',7);
+/*!40000 ALTER TABLE `city` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `country`
+--
+
+DROP TABLE IF EXISTS `country`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `country` (
+  `countryno` tinyint(3) unsigned NOT NULL,
+  `countryname` varchar(50) NOT NULL,
+  PRIMARY KEY (`countryno`),
+  UNIQUE KEY `countryno` (`countryno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `country`
+--
+
+LOCK TABLES `country` WRITE;
+/*!40000 ALTER TABLE `country` DISABLE KEYS */;
+INSERT INTO `country` VALUES (1,'Argentina'),(2,'Australia'),(3,'Austria'),(4,'Belgium'),(5,'Brazil'),(6,'Canada'),(7,'China'),(8,'Colombia'),(9,'Denmark'),(10,'Egypt'),(11,'Finland'),(12,'France'),(13,'Germany'),(14,'Greece'),(15,'India'),(16,'Indonesia'),(17,'Italy'),(18,'Japan'),(19,'Mexico'),(20,'New Zealand'),(21,'Poland'),(22,'Portugal'),(23,'Russia'),(24,'Spain'),(25,'Switzerland'),(26,'UK'),(27,'USA');
+/*!40000 ALTER TABLE `country` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `customer`
+--
+
+DROP TABLE IF EXISTS `customer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `customer` (
+  `customerno` int(11) NOT NULL,
+  `customername` varchar(50) DEFAULT NULL,
+  `customertypeno` smallint(6) DEFAULT NULL,
+  `identifynum` varchar(20) NOT NULL,
+  `sex` char(5) NOT NULL,
+  `phonenum` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`customerno`),
+  UNIQUE KEY `customerno` (`customerno`),
+  KEY `customertypeno` (`customertypeno`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`customertypeno`) REFERENCES `customertype` (`customertypeno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `customer`
+--
+
+LOCK TABLES `customer` WRITE;
+/*!40000 ALTER TABLE `customer` DISABLE KEYS */;
+INSERT INTO `customer` VALUES (1,'王志龙',2,'150426197509106000','男','13987654321'),(2,'林丽芬',2,'522427197203101870','女','13912345637'),(3,'张越',2,'110115197406214000','男','13812345678'),(4,'黄大芬',1,'51068219700517267X','女','13887654321'),(5,'李小克',1,'33010119780527283X','男','13712345678'),(6,'林熙',2,'623001198008248000','男','13476933067'),(7,'邓建国',1,'150622199001224511','男','18336130777'),(8,'张钊',1,'130126198409157711','男','18336109777'),(9,'周小芳',1,'441226198509131251','男','18336109736'),(10,'Stefen Lee',2,'622926198704274197','男','15606330806');
+/*!40000 ALTER TABLE `customer` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER trg_ctom_sex_in BEFORE INSERT
+ON customer FOR EACH ROW
+BEGIN
+  if new.sex <> '男' OR new.sex <> '女' THEN SET new.sex = '男'; END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER trg_ctom_sex_up BEFORE UPDATE
+ON customer FOR EACH ROW
+BEGIN
+  if new.sex <> '男' OR new.sex <> '女' THEN SET new.sex = '男'; END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER tri_customer_udt AFTER UPDATE
+ON customer FOR EACH ROW
+BEGIN
+  UPDATE bookticket
+  SET customername = new.customername,
+    customertypeno = new.customertypeno
+  WHERE customerno = new.customerno;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `customertype`
+--
+
+DROP TABLE IF EXISTS `customertype`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `customertype` (
+  `customertypeno` smallint(6) NOT NULL,
+  `customertypename` varchar(20) NOT NULL,
+  `discountpercent` tinyint(4) DEFAULT NULL,
+  PRIMARY KEY (`customertypeno`),
+  UNIQUE KEY `customertypeno` (`customertypeno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `customertype`
+--
+
+LOCK TABLES `customertype` WRITE;
+/*!40000 ALTER TABLE `customertype` DISABLE KEYS */;
+INSERT INTO `customertype` VALUES (1,'普通客户',0),(2,'VIP',20);
+/*!40000 ALTER TABLE `customertype` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER trg_ctomtype_in BEFORE INSERT
+ON customertype FOR EACH ROW
+BEGIN
+  if new.discountpercent > 90 THEN set new.discountpercent = 90; END IF;
+  if new.discountpercent < 0 THEN set new.discountpercent = 0; END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER trg_cotmtype_up BEFORE UPDATE
+ON  customertype FOR EACH ROW
+BEGIN
+  if new.discountpercent > 90 THEN set new.discountpercent = 90; END IF;
+  if new.discountpercent < 0 THEN set new.discountpercent = 0; END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER tri_discount_udt AFTER UPDATE
+ON customertype FOR EACH ROW
+BEGIN
+  UPDATE bookticket
+  SET discountpercent = new.discountpercent
+  WHERE customertypeno = new.customertypeno;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `shipspace`
+--
+
+DROP TABLE IF EXISTS `shipspace`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shipspace` (
+  `shipno` tinyint(4) NOT NULL,
+  `shipname` varchar(10) NOT NULL,
+  `gift` char(10) DEFAULT NULL,
+  `drinks` char(10) DEFAULT NULL,
+  `food` char(10) DEFAULT NULL,
+  `movie` char(10) DEFAULT NULL,
+  `ticketchange` char(10) DEFAULT NULL,
+  `ticketreturn` char(10) DEFAULT NULL,
+  `discount` char(10) DEFAULT NULL,
+  PRIMARY KEY (`shipno`),
+  UNIQUE KEY `shipno` (`shipno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `shipspace`
+--
+
+LOCK TABLES `shipspace` WRITE;
+/*!40000 ALTER TABLE `shipspace` DISABLE KEYS */;
+INSERT INTO `shipspace` VALUES (1,'头等舱','是','是','是','是','是','是','是'),(2,'商务舱','否','是','是','是','否','否','否'),(3,'经济舱','否','是','是','是','否','否','否');
+/*!40000 ALTER TABLE `shipspace` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Temporary table structure for view `vi_airline_info`
+--
+
+DROP TABLE IF EXISTS `vi_airline_info`;
+/*!50001 DROP VIEW IF EXISTS `vi_airline_info`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_airline_info` AS SELECT 
+ 1 AS `airlineno`,
+ 1 AS `airwayshortname`,
+ 1 AS `airplaneno`,
+ 1 AS `airplanetype`,
+ 1 AS `departurecountry`,
+ 1 AS `departurecity`,
+ 1 AS `arrivecountry`,
+ 1 AS `arrivecity`,
+ 1 AS `departuredate`,
+ 1 AS `departuretime`,
+ 1 AS `arrivetime`,
+ 1 AS `economyclassprice`,
+ 1 AS `economyclassnum`,
+ 1 AS `businessclassprice`,
+ 1 AS `businessclassnum`,
+ 1 AS `deluxeclassprice`,
+ 1 AS `deluxeclassnum`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_country_city`
+--
+
+DROP TABLE IF EXISTS `vi_country_city`;
+/*!50001 DROP VIEW IF EXISTS `vi_country_city`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_country_city` AS SELECT 
+ 1 AS `countryno`,
+ 1 AS `countryname`,
+ 1 AS `provincename`,
+ 1 AS `cityname`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_customer_info`
+--
+
+DROP TABLE IF EXISTS `vi_customer_info`;
+/*!50001 DROP VIEW IF EXISTS `vi_customer_info`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_customer_info` AS SELECT 
+ 1 AS `customerno`,
+ 1 AS `customername`,
+ 1 AS `customertypeno`,
+ 1 AS `customertypename`,
+ 1 AS `discountpercent`,
+ 1 AS `identifynum`,
+ 1 AS `sex`,
+ 1 AS `phonenum`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_customer_no`
+--
+
+DROP TABLE IF EXISTS `vi_customer_no`;
+/*!50001 DROP VIEW IF EXISTS `vi_customer_no`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_customer_no` AS SELECT 
+ 1 AS `customerno`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_customernum`
+--
+
+DROP TABLE IF EXISTS `vi_customernum`;
+/*!50001 DROP VIEW IF EXISTS `vi_customernum`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_customernum` AS SELECT 
+ 1 AS `max_num`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_line_info`
+--
+
+DROP TABLE IF EXISTS `vi_line_info`;
+/*!50001 DROP VIEW IF EXISTS `vi_line_info`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_line_info` AS SELECT 
+ 1 AS `airlineno`,
+ 1 AS `airwayshortname`,
+ 1 AS `departurecity`,
+ 1 AS `arrivecity`,
+ 1 AS `departuredate`,
+ 1 AS `departuretime`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_plane_line_info`
+--
+
+DROP TABLE IF EXISTS `vi_plane_line_info`;
+/*!50001 DROP VIEW IF EXISTS `vi_plane_line_info`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_plane_line_info` AS SELECT 
+ 1 AS `airplaneno`,
+ 1 AS `airplanetype`,
+ 1 AS `airlineno`,
+ 1 AS `departurecity`,
+ 1 AS `arrivecity`,
+ 1 AS `departuredate`,
+ 1 AS `departuretime`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_plane_service_days`
+--
+
+DROP TABLE IF EXISTS `vi_plane_service_days`;
+/*!50001 DROP VIEW IF EXISTS `vi_plane_service_days`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_plane_service_days` AS SELECT 
+ 1 AS `客机编号`,
+ 1 AS `客机类型`,
+ 1 AS `航空公司`,
+ 1 AS `购买日期`,
+ 1 AS `服役年数`,
+ 1 AS `经济舱数量`,
+ 1 AS `商务舱价格`,
+ 1 AS `头等舱数量`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_ship_name`
+--
+
+DROP TABLE IF EXISTS `vi_ship_name`;
+/*!50001 DROP VIEW IF EXISTS `vi_ship_name`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_ship_name` AS SELECT 
+ 1 AS `shipname`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_ticket_change`
+--
+
+DROP TABLE IF EXISTS `vi_ticket_change`;
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_change`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_ticket_change` AS SELECT 
+ 1 AS `booknum`,
+ 1 AS `customername`,
+ 1 AS `airlineno`,
+ 1 AS `departurecity`,
+ 1 AS `arrivecity`,
+ 1 AS `departuredate`,
+ 1 AS `departuretime`,
+ 1 AS `shipno`,
+ 1 AS `shipname`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_ticket_max`
+--
+
+DROP TABLE IF EXISTS `vi_ticket_max`;
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_max`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_ticket_max` AS SELECT 
+ 1 AS `max_ticket_num`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_ticket_num_count`
+--
+
+DROP TABLE IF EXISTS `vi_ticket_num_count`;
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_num_count`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_ticket_num_count` AS SELECT 
+ 1 AS `airlineno`,
+ 1 AS `shipno`,
+ 1 AS `economyclassnum`,
+ 1 AS `businessclassnum`,
+ 1 AS `deluxeclassnum`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_totalprice`
+--
+
+DROP TABLE IF EXISTS `vi_totalprice`;
+/*!50001 DROP VIEW IF EXISTS `vi_totalprice`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_totalprice` AS SELECT 
+ 1 AS `订票编号`,
+ 1 AS `客户编号`,
+ 1 AS `客户姓名`,
+ 1 AS `客户类型`,
+ 1 AS `折扣比例`,
+ 1 AS `航班编号`,
+ 1 AS `出发国家`,
+ 1 AS `出发城市`,
+ 1 AS `到达国家`,
+ 1 AS `到达城市`,
+ 1 AS `舱位等级`,
+ 1 AS `票价`,
+ 1 AS `总价`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_type_discount`
+--
+
+DROP TABLE IF EXISTS `vi_type_discount`;
+/*!50001 DROP VIEW IF EXISTS `vi_type_discount`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_type_discount` AS SELECT 
+ 1 AS `customertypename`,
+ 1 AS `discountpercent`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vi_typename`
+--
+
+DROP TABLE IF EXISTS `vi_typename`;
+/*!50001 DROP VIEW IF EXISTS `vi_typename`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vi_typename` AS SELECT 
+ 1 AS `客户类型`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Final view structure for view `vi_airline_info`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_airline_info`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_airline_info` AS select `l`.`airlineno` AS `airlineno`,`l`.`airwayshortname` AS `airwayshortname`,`p`.`airplaneno` AS `airplaneno`,`p`.`airplanetype` AS `airplanetype`,`d`.`countryname` AS `departurecountry`,`l`.`departurecity` AS `departurecity`,`a`.`countryname` AS `arrivecountry`,`l`.`arrivecity` AS `arrivecity`,`l`.`departuredate` AS `departuredate`,`l`.`departuretime` AS `departuretime`,`l`.`arrivetime` AS `arrivetime`,`l`.`economyclassprice` AS `economyclassprice`,`p`.`economyclassnum` AS `economyclassnum`,`l`.`businessclassprice` AS `businessclassprice`,`p`.`businessclassnum` AS `businessclassnum`,`l`.`deluxeclassprice` AS `deluxeclassprice`,`p`.`deluxeclassnum` AS `deluxeclassnum` from (((((`airline` `l` join `airplane` `p`) join `city` `x`) join `city` `y`) join `country` `d`) join `country` `a`) where ((`l`.`departurecity` = `x`.`cityname`) and (`l`.`arrivecity` = `y`.`cityname`) and (`x`.`countryno` = `d`.`countryno`) and (`a`.`countryno` = `y`.`countryno`) and (`l`.`airlineno` = `p`.`airlineno`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_country_city`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_country_city`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_country_city` AS select `ci`.`countryno` AS `countryno`,`co`.`countryname` AS `countryname`,`ci`.`provincename` AS `provincename`,`ci`.`cityname` AS `cityname` from (`country` `co` join `city` `ci`) where (`co`.`countryno` = `ci`.`countryno`) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_customer_info`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_customer_info`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_customer_info` AS select `c`.`customerno` AS `customerno`,`c`.`customername` AS `customername`,`c`.`customertypeno` AS `customertypeno`,`ct`.`customertypename` AS `customertypename`,`ct`.`discountpercent` AS `discountpercent`,`c`.`identifynum` AS `identifynum`,`c`.`sex` AS `sex`,`c`.`phonenum` AS `phonenum` from (`customer` `c` join `customertype` `ct`) where (`c`.`customertypeno` = `ct`.`customertypeno`) order by `c`.`customerno` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_customer_no`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_customer_no`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_customer_no` AS select `customer`.`customerno` AS `customerno` from `customer` order by `customer`.`customerno` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_customernum`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_customernum`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_customernum` AS select max(`customer`.`customerno`) AS `max_num` from `customer` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_line_info`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_line_info`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_line_info` AS select `airline`.`airlineno` AS `airlineno`,`airline`.`airwayshortname` AS `airwayshortname`,`airline`.`departurecity` AS `departurecity`,`airline`.`arrivecity` AS `arrivecity`,`airline`.`departuredate` AS `departuredate`,`airline`.`departuretime` AS `departuretime` from `airline` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_plane_line_info`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_plane_line_info`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_plane_line_info` AS select `p`.`airplaneno` AS `airplaneno`,`p`.`airplanetype` AS `airplanetype`,`p`.`airlineno` AS `airlineno`,`l`.`departurecity` AS `departurecity`,`l`.`arrivecity` AS `arrivecity`,`l`.`departuredate` AS `departuredate`,`l`.`departuretime` AS `departuretime` from (`airplane` `p` join `airline` `l`) where (`p`.`airlineno` = `l`.`airlineno`) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_plane_service_days`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_plane_service_days`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_plane_service_days` AS select `ap`.`airplaneno` AS `客机编号`,`ap`.`airplanetype` AS `客机类型`,`aw`.`airwayname` AS `航空公司`,`ap`.`buydate` AS `购买日期`,(year(now()) - year(`ap`.`buydate`)) AS `服役年数`,`ap`.`economyclassnum` AS `经济舱数量`,`ap`.`businessclassnum` AS `商务舱价格`,`ap`.`deluxeclassnum` AS `头等舱数量` from ((`airplane` `ap` join `airline` `al`) join `airway` `aw`) where ((`ap`.`airlineno` = `al`.`airlineno`) and (`al`.`airwayshortname` = `aw`.`airwayshortname`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_ship_name`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_ship_name`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_ship_name` AS select `shipspace`.`shipname` AS `shipname` from `shipspace` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_ticket_change`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_change`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_ticket_change` AS select `b`.`booknum` AS `booknum`,`b`.`customername` AS `customername`,`b`.`airlineno` AS `airlineno`,`b`.`departurecity` AS `departurecity`,`b`.`arrivecity` AS `arrivecity`,`a`.`departuredate` AS `departuredate`,`a`.`departuretime` AS `departuretime`,`b`.`shipno` AS `shipno`,`s`.`shipname` AS `shipname` from ((`bookticket` `b` join `airline` `a`) join `shipspace` `s`) where ((`b`.`airlineno` = `a`.`airlineno`) and (`b`.`shipno` = `s`.`shipno`)) order by `b`.`booknum` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_ticket_max`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_max`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_ticket_max` AS select max(`bookticket`.`booknum`) AS `max_ticket_num` from `bookticket` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_ticket_num_count`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_ticket_num_count`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_ticket_num_count` AS select `p`.`airlineno` AS `airlineno`,`b`.`shipno` AS `shipno`,`p`.`economyclassnum` AS `economyclassnum`,`p`.`businessclassnum` AS `businessclassnum`,`p`.`deluxeclassnum` AS `deluxeclassnum` from (`bookticket` `b` join `airplane` `p`) where (`b`.`airlineno` = `p`.`airlineno`) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_totalprice`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_totalprice`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_totalprice` AS select `bt`.`booknum` AS `订票编号`,`bt`.`customerno` AS `客户编号`,`bt`.`customername` AS `客户姓名`,`ct`.`customertypename` AS `客户类型`,`bt`.`discountpercent` AS `折扣比例`,`bt`.`airlineno` AS `航班编号`,`x`.`countryname` AS `出发国家`,`bt`.`departurecity` AS `出发城市`,`y`.`countryname` AS `到达国家`,`bt`.`arrivecity` AS `到达城市`,`s`.`shipname` AS `舱位等级`,`bt`.`ticketprice` AS `票价`,(`bt`.`ticketprice` * (1 - (`bt`.`discountpercent` / 100))) AS `总价` from ((((`bookticket` `bt` join `country` `x`) join `country` `y`) join `customertype` `ct`) join `shipspace` `s`) where ((`bt`.`departurecountry` = `x`.`countryno`) and (`bt`.`arrivecountry` = `y`.`countryno`) and (`bt`.`customertypeno` = `ct`.`customertypeno`) and (`bt`.`discountpercent` = `ct`.`discountpercent`) and (`bt`.`shipno` = `s`.`shipno`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_type_discount`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_type_discount`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_type_discount` AS select `customertype`.`customertypename` AS `customertypename`,`customertype`.`discountpercent` AS `discountpercent` from `customertype` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vi_typename`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vi_typename`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vi_typename` AS select `customertype`.`customertypename` AS `客户类型` from `customertype` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-06-24 21:01:09
