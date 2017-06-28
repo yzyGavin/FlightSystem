@@ -1,7 +1,5 @@
 #include "ConnectDataBase.h"
 
-#include <iostream>
-
 ConnectDataBase::ConnectDataBase()
 {
     _dataBase = QSqlDatabase::addDatabase("QMYSQL");
@@ -19,7 +17,6 @@ ConnectDataBase::ConnectDataBase()
     {
         std::cout << "数据库连接错误，请查看网络连接是否正确" << std::endl;
         std::cout << _dataBase.lastError().text().toStdString() << std::endl;
-        exit(0);
     }
 }
 
