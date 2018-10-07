@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         QMessageBox(QMessageBox::Critical, "错误", "无法初始化主界面", QMessageBox::Ok).exec();
         return EXIT_FAILURE;
     }
-//    f->show();
+    //f->show();
     QApplication::processEvents();
     /*
      * 将登录类与主界面的类通过信号绑定，当login类检查到登陆成功时则会发信号到flightmanager

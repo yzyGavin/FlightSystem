@@ -1,5 +1,7 @@
 #include "ConnectDataBase.h"
 
+#include <iostream>
+
 ConnectDataBase::ConnectDataBase()
 {
     _dataBase = QSqlDatabase::addDatabase("QMYSQL");
