@@ -25,13 +25,10 @@ Login::~Login()
     disconnect(this, SIGNAL(send()), this, SLOT(close()));
     disconnect(this, SIGNAL(send()), this, SLOT(deleteLater()));
 
-    if (ui)
-    {
-        delete ui;
-        ui = nullptr;
+    delete ui;
+    ui = nullptr;
 
-        std::cout << "delete Login" << std::endl;
-    }
+    std::cout << "delete Login" << std::endl;
 }
 
 int Login::CheckWriting()
